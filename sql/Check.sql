@@ -1,0 +1,1 @@
+SELECT 'vid', 'cid', 'text', 'type', 'time', 'modifierid', 'comment' from '%prefix%verion_plugin';

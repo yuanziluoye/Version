@@ -1,0 +1,29 @@
+.version-plugin-row:hover .version-plugin-modifier,
+.version-plugin-row:hover .version-plugin-row-short-time
+{
+	display: none;
+}
+
+.version-plugin-row:hover .version-plugin-actions,
+.version-plugin-row:hover .version-plugin-row-long-time
+{
+	display: inline-block;
+}
+
+.version-plugin-actions {
+	display: none;
+}
+
+.version-plugin-btn {
+	height: 20px;
+	padding: 0px 4px;
+	display: inline;
+}
+
+.version-plugin-table-wrap-narrow {
+	padding: 10px;
+}
+
+.version-plugin-row-long-time {
+	display: none;
+}
