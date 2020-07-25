@@ -47,9 +47,12 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         $cid = $row['cid'];
 
         $raw = $db->fetchRow($db->select()->from('table.contents')->where("cid = ? ", $cid));
+        $raw2 = $db->fetchRow($db->select()->from('table.contents')->where("parent = ? AND (type = 'post' OR type = 'post_draft' OR type = 'page' OR type = 'page_draft')", $cid));
         $raw['text'] = $row['text'];
+        $raw2['text'] = $row['text'];
 
         $db->query($db->update('table.contents')->rows($raw)->where('cid = ? ', $cid));
+        $db->query($db->update('table.contents')->rows($raw2)->where("parent = ?  AND (type = 'post' OR type = 'post_draft' OR type = 'page' OR type = 'page_draft')", $cid));
         
         $this->response->setContentType('image/gif');
         echo base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAQUAP8ALAAAAAABAAEAAAICRAEAOw==');
@@ -74,6 +77,26 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         
         $this->response->setContentType('image/gif');
         echo base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAQUAP8ALAAAAAABAAEAAAICRAEAOw==');
-	}
+    }
+    
+    public function preview()
+	{
+        $this->permissionCheck();
+
+        $vid = $this->request->get('vid');
+
+        if(!isset($vid))
+            throw new Typecho_Widget_Exception(_t('参数不正确'), 404);
+        
+        $vid = intval($vid);
+
+        $db = Typecho_Db::get();
+        $prefix = $db->getPrefix();
+        $table = $prefix . 'verion_plugin';
+        $row = $db->fetchRow($db->select()->from($table)->where('vid = ? ', $vid));
+        
+        $this->response->setContentType('text/plain');
+        echo $row['text'];
+    }
 
 }

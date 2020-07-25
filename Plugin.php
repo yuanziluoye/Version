@@ -4,7 +4,7 @@
  *
  * @package Version
  * @author innc11
- * @version 1.0
+ * @version 1.1
  * @link https://innc11.cn
  */
 
@@ -27,8 +27,9 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		Typecho_Plugin::factory('Widget_Contents_Page_Edit')->finishSave =     ['Version_Plugin', 'onPageSave'];
 
 		// 注册路由
-		Helper::addRoute("Version_Plugin_Revert", "/version-plugin/revert", "Version_Action", 'revert');
-		Helper::addRoute("Version_Plugin_Delete", "/version-plugin/delete", "Version_Action", 'delete');
+		Helper::addRoute("Version_Plugin_Revert",  "/version-plugin/revert",  "Version_Action", 'revert');
+		Helper::addRoute("Version_Plugin_Delete",  "/version-plugin/delete",  "Version_Action", 'delete');
+		Helper::addRoute("Version_Plugin_Preview", "/version-plugin/preview", "Version_Action", 'preview');
 
 		return $result;
 	}
@@ -48,6 +49,7 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		
 		Helper::removeRoute("Version_Plugin_Revert");
 		Helper::removeRoute("Version_Plugin_Delete");
+		Helper::removeRoute("Version_Plugin_Preview");
 	}
 
 	public static function render()
@@ -86,6 +88,7 @@ class Version_Plugin implements Typecho_Plugin_Interface
 	public static function inject($pageOrPost)
 	{
 		$options = Typecho_Widget::widget('Widget_Options');
+		echo '<script src="' . $options->pluginUrl . '/Version/js/overwrite.js"></script>' . PHP_EOL;
 		echo '<script src="' . $options->pluginUrl . '/Version/js/inject.js"></script>' . PHP_EOL;
 		echo '<link rel="stylesheet" href="' . $options->pluginUrl . '/Version/css/main.css"/>' . PHP_EOL;
 
@@ -118,26 +121,54 @@ class Version_Plugin implements Typecho_Plugin_Interface
 
 	public static function record($contents, $that)
 	{
-		$type = $contents['type'];
+		// $type = $contents['type'];
 
 		$user = Typecho_Widget::widget('Widget_User');
 		$user->hasLogin();
 
 		$db = Typecho_Db::get();
 		$prefix = $db->getPrefix();
+		$table = $prefix . 'verion_plugin';
 		$time = Helper::options()->gmtTime + (Helper::options()->timezone - Helper::options()->serverTimezone);
 		$uid = $user->uid;
+
+		if($that->request->t == 'auto') // 如果是自动保存
+		{
+			$row = $db->fetchRow($db->select()->from($table)->where("auto = 'auto' AND cid = ? ", $that->cid));
+
+			if(!empty($row))
+			{
+				$row['time'] = $time;
+				$row['modifierid'] = $uid;
+				$row['text'] = $contents['text'];
+	
+				$db->query($db->update($table)->rows($row)->where("vid = ? ", $row['vid']));
+			}else{
+				$row = [
+					"cid" => $that->cid,
+					'text' => $contents['text'],
+					'auto' => 'auto',
+					'time' => $time,
+					'modifierid' => $uid
+				];
+	
+				$db->query($db->insert($prefix.'verion_plugin')->rows($row));
+			}
+			
+		}else{
+			$row = [
+				"cid" => $that->cid,
+				'text' => $contents['text'],
+				'auto' => NULL,
+				'time' => $time,
+				'modifierid' => $uid
+			];
+
+			$db->query($db->insert($prefix.'verion_plugin')->rows($row));
+			
+			$db->query($db->delete($table)->where("auto = 'auto' AND cid = ? ", $that->cid));
+		}
 		
-		$row = [
-			"cid" => $that->cid,
-			'text' => $contents['text'],
-			'type' => $type,
-			'time' => $time,
-			'modifierid' => $uid,
-			'comment' => NULL
-		];
-		
-		$db->query($db->insert($prefix.'verion_plugin')->rows($row));
 	}
 
 	public static function getSQL($file)
