@@ -28,6 +28,11 @@
 
 ![overview](https://res.innc11.cn/pictures/version/20200725211151.png)
 
+## 版本历史
+
+- 1.0 (20-7-25)
+  - 首次发布
+
 ## 代码参考
 
 1. [Typecho项目](https://github.com/typecho/typecho)
