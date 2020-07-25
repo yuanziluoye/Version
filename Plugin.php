@@ -1,6 +1,6 @@
 <?php
 /**
- * 对文章增加简单的修改记录功能(包括文章和独立页面)<br/>项目地址: <a href="https://github.com/innc11/Version">innc11/Version</a>
+ * 对文章增加简单的修改记录功能(包括文章和独立页面)<br/>项目地址和帮助信息: <a href="https://github.com/innc11/Version">innc11/Version</a>
  *
  * @package Version
  * @author innc11
@@ -64,14 +64,12 @@ class Version_Plugin implements Typecho_Plugin_Interface
 	{
 
 		$desc = new Typecho_Widget_Helper_Form_Element_Text('desc', NULL, '', _t('代码参考:'),
-            _t('<ol>
-					<li>
-						<a href="https://github.com/typecho/typecho/blob/5ba2f03206824e33036a56bad0cf46ac318d6a77/var/Widget/Archive.php">Typecho项目</a> | 
-						<a href="https://github.com/kokororin/typecho-plugin-Access">Access插件</a> | 
-						<a href="http://www.imhan.com/archives/typecho-links/">Link友链插件</a> | 
-						<a href="https://dt27.org/php/editormd-for-typecho/">EditorMD插件</a>
-					</li>
-				</ol>'));
+            _t('<ol><li>
+					<a href="https://github.com/typecho/typecho">Typecho项目</a> | 
+					<a href="https://github.com/kokororin/typecho-plugin-Access">Access插件</a> | 
+					<a href="http://www.imhan.com/archives/typecho-links/">Link友链插件</a> | 
+					<a href="https://dt27.org/php/editormd-for-typecho">EditorMD插件</a>
+				</li></ol>'));
 		$form->addInput($desc);
 
 		echo '<script> window.onload = function() { document.getElementsByName("desc")[0].type = "hidden"; } </script>';

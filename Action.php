@@ -35,7 +35,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         $vid = $this->request->get('vid');
 
         if(!isset($vid))
-            throw new Typecho_Widget_Exception(_t('参数不正确'), 503);
+            throw new Typecho_Widget_Exception(_t('参数不正确'), 404);
         
         $vid = intval($vid);
 
@@ -62,7 +62,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         $vid = $this->request->get('vid');
 
         if(!isset($vid))
-            throw new Typecho_Widget_Exception(_t('参数不正确'), 503);
+            throw new Typecho_Widget_Exception(_t('参数不正确'), 404);
         
         $vid = intval($vid);
 
