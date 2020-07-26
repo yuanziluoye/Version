@@ -4,7 +4,7 @@
  *
  * @package Version
  * @author innc11
- * @version 1.2.1
+ * @version 1.2.2
  * @link https://innc11.cn
  */
 
@@ -85,11 +85,15 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		echo '<script src="' . $options->pluginUrl . '/Version/js/inject.js"></script>' . PHP_EOL;
 		echo '<link rel="stylesheet" href="' . $options->pluginUrl . '/Version/css/main.css"/>' . PHP_EOL;
 
+		$db = Typecho_Db::get();
+		$table = $db->getPrefix() . 'verion_plugin';
+		$rows = $db->fetchAll($db->select()->from($table)->where("cid = ? ", $page->cid)->order('time', Typecho_Db::SORT_DESC));
+
 		ob_start();
 		include 'version-tab.php';
 		$content = ob_get_clean();
 
-		echo "<script>version_plugin_inj(`" . $content . "`)</script>" . PHP_EOL;
+		echo "<script>version_plugin_inj(`" . $content . "`, ".count($rows).")</script>" . PHP_EOL;
 	}
 
 	public static function onPostDelete($postCid, $that)
@@ -100,8 +104,7 @@ class Version_Plugin implements Typecho_Plugin_Interface
 	public static function onPageDelete($pageCid, $that)
 	{
 		$db = Typecho_Db::get();
-        $prefix = $db->getPrefix();
-        $table = $prefix . 'verion_plugin';
+        $table = $db->getPrefix() . 'verion_plugin';
 
         $db->query($db->delete($table)->where('cid = ? ', $pageCid));
 	}
@@ -134,8 +137,7 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		$user->hasLogin();
 
 		$db = Typecho_Db::get();
-		$prefix = $db->getPrefix();
-		$table = $prefix . 'verion_plugin';
+		$table = $db->getPrefix() . 'verion_plugin';
 		$time = Helper::options()->gmtTime + (Helper::options()->timezone - Helper::options()->serverTimezone);
 		$uid = $user->uid;
 
@@ -159,21 +161,33 @@ class Version_Plugin implements Typecho_Plugin_Interface
 					'modifierid' => $uid
 				];
 	
-				$db->query($db->insert($prefix.'verion_plugin')->rows($row));
+				$db->query($db->insert($table)->rows($row));
 			}
 			
 		}else{
-			$row = [
-				"cid" => $that->cid,
-				'text' => $contents['text'],
-				'auto' => NULL,
-				'time' => $time,
-				'modifierid' => $uid
-			];
+			//                                                               自动保存的内容不包括在内
+			$raw = $db->fetchRow($db->select()->from($table)->where("cid = ? AND auto IS NULL", $that->cid)->order('time', Typecho_Db::SORT_DESC));
 
-			$db->query($db->insert($prefix.'verion_plugin')->rows($row));
+			// 如果内容没有变更就更新一下时间什么的，就不需要新建一个记录了
+			if(!empty($raw) && $contents['text']==$raw['text'])
+			{
+				$raw['time'] = $time;
+				$raw['modifierid'] = $uid;
+				$db->query($db->update($table)->rows($raw)->where("vid = ? ", $raw['vid']));
+			}else{
+				$row = [
+					"cid" => $that->cid,
+					'text' => $contents['text'],
+					'auto' => NULL,
+					'time' => $time,
+					'modifierid' => $uid
+				];
+				$db->query($db->insert($table)->rows($row));
+			}
 			
+			// 删掉自动保存的内容
 			$db->query($db->delete($table)->where("auto = 'auto' AND cid = ? ", $that->cid));
+			
 		}
 		
 	}

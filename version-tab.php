@@ -7,11 +7,12 @@
 	$prefix = $db->getPrefix();
 	$table = $prefix . 'verion_plugin';
 	$rows = $db->fetchAll($db->select()->from($table)->where("cid = ? ", $page->cid)->order('time', Typecho_Db::SORT_DESC));
+
 ?>
 
 <div id="tab-verions" class="tab-content hidden p">
 	<p><label class="typecho-label" style="color: #e8c957;"><?php _e('提示: 鼠标悬停以显示更多操作'); ?></label></p>
-	<p><label class="typecho-label" style="color: #e88657;"><?php _e('注意: 自动保存的版本会在保存后被自动删除'); ?></label></p>
+	<p><label class="typecho-label" style="color: #e88657;"><?php _e('注意: 自动保存的版本会在手动保存后被自动删除'); ?></label></p>
 	
 	<div class="version-plugin-view hidden">
 		<div class="version-plugin-view-tip">点击四周的空白处可以退出预览</div>

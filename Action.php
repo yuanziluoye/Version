@@ -46,8 +46,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         $vid = intval($vid);
 
         $db = Typecho_Db::get();
-        $prefix = $db->getPrefix();
-        $table = $prefix . 'verion_plugin';
+        $table = $db->getPrefix() . 'verion_plugin';
         $row = $db->fetchRow($db->select()->from($table)->where('vid = ? ', $vid));
 
         $cid = $row['cid'];
@@ -82,8 +81,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         $vid = intval($vid);
 
         $db = Typecho_Db::get();
-        $prefix = $db->getPrefix();
-        $table = $prefix . 'verion_plugin';
+        $table = $db->getPrefix() . 'verion_plugin';
 
         $db->query($db->delete($table)->where('vid = ? ', $vid));
         
@@ -102,8 +100,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         $vid = intval($vid);
 
         $db = Typecho_Db::get();
-        $prefix = $db->getPrefix();
-        $table = $prefix . 'verion_plugin';
+        $table = $db->getPrefix() . 'verion_plugin';
         $row = $db->fetchRow($db->select()->from($table)->where('vid = ? ', $vid));
         
         $this->response->setContentType('text/plain');
@@ -123,8 +120,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         $vid = intval($vid);
 
         $db = Typecho_Db::get();
-        $prefix = $db->getPrefix();
-        $table = $prefix . 'verion_plugin';
+        $table = $db->getPrefix() . 'verion_plugin';
         $row = $db->fetchRow($db->select()->from($table)->where('vid = ? ', $vid));
 
         if(!empty($row))
