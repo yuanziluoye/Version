@@ -4,7 +4,7 @@
  *
  * @package Version
  * @author innc11
- * @version 1.1
+ * @version 1.2
  * @link https://innc11.cn
  */
 
@@ -30,6 +30,7 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		Helper::addRoute("Version_Plugin_Revert",  "/version-plugin/revert",  "Version_Action", 'revert');
 		Helper::addRoute("Version_Plugin_Delete",  "/version-plugin/delete",  "Version_Action", 'delete');
 		Helper::addRoute("Version_Plugin_Preview", "/version-plugin/preview", "Version_Action", 'preview');
+		Helper::addRoute("Version_Plugin_Comment", "/version-plugin/comment", "Version_Action", 'comment');
 
 		return $result;
 	}
@@ -50,6 +51,8 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		Helper::removeRoute("Version_Plugin_Revert");
 		Helper::removeRoute("Version_Plugin_Delete");
 		Helper::removeRoute("Version_Plugin_Preview");
+		Helper::removeRoute("Version_Plugin_Comment");
+		
 	}
 
 	public static function render()
@@ -64,18 +67,6 @@ class Version_Plugin implements Typecho_Plugin_Interface
 
 	public static function config(Typecho_Widget_Helper_Form $form)
 	{
-
-		$desc = new Typecho_Widget_Helper_Form_Element_Text('desc', NULL, '', _t('代码参考:'),
-            _t('<ol><li>
-					<a href="https://github.com/typecho/typecho">Typecho项目</a> | 
-					<a href="https://github.com/kokororin/typecho-plugin-Access">Access插件</a> | 
-					<a href="http://www.imhan.com/archives/typecho-links/">Link友链插件</a> | 
-					<a href="https://dt27.org/php/editormd-for-typecho">EditorMD插件</a>
-				</li></ol>'));
-		$form->addInput($desc);
-
-		echo '<script> window.onload = function() { document.getElementsByName("desc")[0].type = "hidden"; } </script>';
-
 		$clean = new Typecho_Widget_Helper_Form_Element_Radio(
             'clean', array(
                 'yes' => '删除',

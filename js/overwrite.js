@@ -56,9 +56,9 @@ function version_plugin_overwrite()
 	$(':input', form).bind('input change', function (e) {
 		var tagName = $(this).prop('tagName');
 
-        if (tagName.match(/(input|textarea)/i) && e.type == 'change') {
+        if ((tagName.match(/(input|textarea)/i) && e.type == 'change') || $(this).hasClass('version-plugin-no-listening-input')) { // 过滤一些元素
 			return;
-        }
+		}
 
         changed = true;
     });

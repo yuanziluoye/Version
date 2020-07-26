@@ -1,6 +1,6 @@
 $(function(){
 
-	$('.version-plugin-revert').click(function(e){
+	$('.version-plugin-btn-revert').click(function(e){
 		var articalName = $(this).parent().attr('artical-name')
 		var vid = $(this).parent().attr('version-id')
 		var modifier = $(this).parent().attr('modifier')
@@ -12,7 +12,8 @@ $(function(){
 
 		if(confirm(message)) {
 			$.ajax({
-				url: location.origin + "/version-plugin/revert?vid="+vid,
+				url: location.origin + "/version-plugin/revert",
+				data: {vid: vid},
 				cache: false,
 				type: 'GET',
 				success: function (data) {
@@ -25,7 +26,7 @@ $(function(){
 		}
 	})
 
-	$('.version-plugin-delete').click(function(e){
+	$('.version-plugin-btn-delete').click(function(e){
 		var articalName = $(this).parent().attr('artical-name')
 		var vid = $(this).parent().attr('version-id')
 		var modifier = $(this).parent().attr('modifier')
@@ -36,7 +37,8 @@ $(function(){
 
 		if(confirm(message)) {
 			$.ajax({
-				url: location.origin + "/version-plugin/delete?vid="+vid,
+				url: location.origin + "/version-plugin/delete",
+				data: {vid: vid},
 				cache: false,
 				type: 'GET',
 				success: function(data) {
@@ -49,14 +51,15 @@ $(function(){
 		}
 	})
 
-	$('.version-plugin-preview').click(function(e){
+	$('.version-plugin-btn-preview').click(function(e){
 		var vid = $(this).parent().attr('version-id')
 
 		$('.version-plugin-view').removeClass('hidden')
 		$('.version-plugin-text').text('内容正在加载...')
 
 		$.ajax({
-			url: location.origin + "/version-plugin/preview?vid="+vid,
+			url: location.origin + "/version-plugin/preview",
+			data: {vid: vid},
 			cache: false,
 			type: 'GET',
 			success: function(data) {
@@ -68,14 +71,57 @@ $(function(){
 		});
 	})
 
-
+	// 点击屏幕四周可以关闭
 	$('.version-plugin-view').click(function(e){
 		$(this).toggleClass('hidden')
 	})
-
+	// 取消默认操作
 	$('.version-plugin-view-container').click(function(e){
 		e.stopPropagation()
 	})
+
+	// 保存版本的描述
+	var saveDes = function(e, _this)
+	{
+		var vid = _this.parent().parent().parent().find('.version-plugin-actions').attr('version-id')
+		var last = _this.attr('last')
+		var des = _this.val()
+
+		if(last!=des)
+		{
+			_this.attr('last', des)
+			_this.val('正在设置版本描述..')
+
+			$.ajax({
+				url: location.origin + "/version-plugin/comment",
+				data: {vid: vid, comment: des},
+				cache: false,
+				type: 'GET',
+				success: function(data) {
+					_this.val(des)
+				},
+				error: function(xhr, status, error) {
+					_this.val('描述设置失败')
+					alert('描述设置失败')
+				}
+			})
+		}
+	}
+
+	// 失去焦点时保存
+	$('.version-plugin-desc-textarea').bind('blur', function (e){
+		saveDes(e, $(this))
+	});
+	// 回车时保存
+	$('.version-plugin-desc-textarea').bind('keydown blur', function (e){
+		var key = e.which;
+
+		if (key == 13) {
+			e.stopPropagation()
+			saveDes(e, $(this))
+			return false
+		}
+	});
 
 
 })
@@ -84,6 +130,7 @@ $(function(){
 
 function version_plugin_inj(content)
 {
+	// 保证最后执行
 	setTimeout(function(){
 		var seul = $('#edit-secondary ul').eq(0)
 
@@ -95,9 +142,8 @@ function version_plugin_inj(content)
 		
 		seul.append('<li class="w-40"><a href="#tab-verions" id="tab-verions-btn">历史版本</a></li>')
 
-		version_plugin_overwrite() // 为了搞这个，我裂开了
+		version_plugin_overwrite() // 为了搞这个，我都要崩溃了
 	}, 200)
-	
 	
 	var se = $('#edit-secondary')
 	se.append(content)

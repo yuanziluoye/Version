@@ -5,9 +5,9 @@
 }
 
 .version-plugin-row:hover .version-plugin-actions,
-.version-plugin-row:hover .version-plugin-row-long-time
+.version-plugin-row:hover .version-plugin-row-description
 {
-	display: inline-block;
+	display: inline-flex;
 }
 
 .version-plugin-actions {
@@ -18,14 +18,11 @@
 	height: 20px;
 	padding: 0px 4px;
 	display: inline;
+	margin-right: 5px;
 }
 
 .version-plugin-table-wrap-narrow {
 	padding: 10px;
-}
-
-.version-plugin-row-long-time {
-	display: none;
 }
 
 .version-plugin-view {
@@ -44,7 +41,7 @@
 	height: 75%;
 	border-radius: 3px;
 	overflow: hidden;
-	box-shadow: 0px 0px 30px #000000;
+	box-shadow: 0px 0px 5px #000000;
 }
 
 .version-plugin-text {
@@ -63,5 +60,13 @@
 }
 
 .version-plugin-highlight {
-	color: chartreuse;
+	color: #26cebe;
+}
+
+.version-plugin-desc-textarea {
+	line-height: 1;
+	padding: 1px !important;
+	color: inherit !important;
+	outline: none;
+	border: none !important;
 }
