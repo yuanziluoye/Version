@@ -26,9 +26,9 @@
 
 ## 图片
 
-如果图片加载不出来请点击这里直接访问：https://res.innc11.cn/pictures/version/20200725211151.png
+如果图片加载不出来请点击这里直接访问：https://res.innc11.cn/pictures/version/20200726122220.png
 
-![overview](https://res.innc11.cn/pictures/version/20200725211151.png)
+![overview](https://res.innc11.cn/pictures/version/20200726122220.png)
 
 ## 版本历史
 
