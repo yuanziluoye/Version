@@ -1,14 +1,10 @@
 $(function(){
 
 	$('.version-plugin-btn-revert').click(function(e){
-		var articalName = $(this).parent().attr('artical-name')
 		var vid = $(this).parent().attr('version-id')
-		var modifier = $(this).parent().attr('modifier')
 		var time = $(this).parent().attr('time')
 
-		var message = "确定要回退到 "+time+" 的时候吗?\n"
-		message += articalName+" 由 "+modifier+" 修改\n"
-		message += "回退将会覆盖当前内容,请注意保存!"
+		var message = "确定要回退到 "+time+" 的时候吗?"
 
 		if(confirm(message)) {
 			$.ajax({
@@ -27,10 +23,7 @@ $(function(){
 	})
 
 	$('.version-plugin-btn-delete').click(function(e){
-		var articalName = $(this).parent().attr('artical-name')
 		var vid = $(this).parent().attr('version-id')
-		var modifier = $(this).parent().attr('modifier')
-		var time = $(this).parent().attr('time')
 		var _this = this
 
 		var message = "确定要删除这个版本吗?"

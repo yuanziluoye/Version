@@ -9,12 +9,9 @@
 	$rows = $db->fetchAll($db->select()->from($table)->where("cid = ? ", $page->cid)->order('time', Typecho_Db::SORT_DESC));
 ?>
 
-
-
 <div id="tab-verions" class="tab-content hidden p">
-	<p><label class="typecho-label" style="color: #e8c957;"><?php _e('提示: 鼠标悬停以编辑描述和显示更多操作'); ?></label></p>
-	<p><label class="typecho-label" style="color: #e88657;"><?php _e('注意: 自动保存的版本会在保存后被自动删除；版本描述可以直接编辑，按Enter或者失去焦点后会自动保存'); ?></label></p>
-	<p><label class="typecho-label"><?php _e('回：回退到这个版本<br/>阅：预览这个版本的内容<br/>删：从数据库删除这个版本'); ?></label></p>
+	<p><label class="typecho-label" style="color: #e8c957;"><?php _e('提示: 鼠标悬停以显示更多操作'); ?></label></p>
+	<p><label class="typecho-label" style="color: #e88657;"><?php _e('注意: 自动保存的版本会在保存后被自动删除'); ?></label></p>
 	
 	<div class="version-plugin-view hidden">
 		<div class="version-plugin-view-tip">点击四周的空白处可以退出预览</div>
@@ -33,7 +30,7 @@
 
 			<thead>
 				<tr>
-					<th><?php _e('时间轴'); ?></th>
+					<th><?php _e('时间'); ?></th>
 					<th><?php _e('编辑'); ?></th>
 				</tr>
 			</thead>
@@ -75,11 +72,11 @@
 									is-auto="<?php _e($row['auto']); ?>"
 							>
 
-								<button type="button" class="btn primary version-plugin-btn version-plugin-btn-revert" title="回退"><?php _e('回'); ?></button>
+								<button type="button" class="btn primary version-plugin-btn version-plugin-btn-revert" title="回退到这个版本"><?php _e('回'); ?></button>
 								
-								<button type="button" class="btn primary version-plugin-btn version-plugin-btn-preview" title="预览"><?php _e('阅'); ?></button>
+								<button type="button" class="btn primary version-plugin-btn version-plugin-btn-preview" title="预览这个版本的内容"><?php _e('阅'); ?></button>
 
-								<button type="button" class="btn primary version-plugin-btn version-plugin-btn-delete" title="删除"><?php _e('删'); ?></button>
+								<button type="button" class="btn primary version-plugin-btn version-plugin-btn-delete" title="从数据库删除这个版本"><?php _e('删'); ?></button>
 
 							</div>
 

@@ -4,7 +4,7 @@
  *
  * @package Version
  * @author innc11
- * @version 1.2
+ * @version 1.2.1
  * @link https://innc11.cn
  */
 
@@ -25,6 +25,8 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		Typecho_Plugin::factory('Widget_Contents_Post_Edit')->finishSave =     ['Version_Plugin', 'onPostSave'];
 		Typecho_Plugin::factory('Widget_Contents_Page_Edit')->finishPublish =  ['Version_Plugin', 'onPagePublish'];
 		Typecho_Plugin::factory('Widget_Contents_Page_Edit')->finishSave =     ['Version_Plugin', 'onPageSave'];
+		Typecho_Plugin::factory('Widget_Contents_Post_Edit')->delete =  ['Version_Plugin', 'onPostDelete'];
+		Typecho_Plugin::factory('Widget_Contents_Page_Edit')->delete =  ['Version_Plugin', 'onPageDelete'];
 
 		// 注册路由
 		Helper::addRoute("Version_Plugin_Revert",  "/version-plugin/revert",  "Version_Action", 'revert');
@@ -84,10 +86,24 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		echo '<link rel="stylesheet" href="' . $options->pluginUrl . '/Version/css/main.css"/>' . PHP_EOL;
 
 		ob_start();
-		include 'injection/tab.php';
+		include 'version-tab.php';
 		$content = ob_get_clean();
 
 		echo "<script>version_plugin_inj(`" . $content . "`)</script>" . PHP_EOL;
+	}
+
+	public static function onPostDelete($postCid, $that)
+	{
+		self::onPageDelete($postCid, $that);
+	}
+
+	public static function onPageDelete($pageCid, $that)
+	{
+		$db = Typecho_Db::get();
+        $prefix = $db->getPrefix();
+        $table = $prefix . 'verion_plugin';
+
+        $db->query($db->delete($table)->where('cid = ? ', $pageCid));
 	}
 
 	public static function onPostPublish($contents, $that)
