@@ -40,8 +40,6 @@
 
 ## 图片
 
-如果图片加载不出来请点击这里直接访问：https://res.innc11.cn/pictures/version/QQ20200726152008.png
-
 #### 预览1
 
 ![overview2](https://res.innc11.cn/pictures/version/2020-07-26152730.png)
