@@ -42,13 +42,13 @@
 
 如果图片加载不出来请点击这里直接访问：https://res.innc11.cn/pictures/version/QQ20200726152008.png
 
-#### 预览1(自己的样式的后台)
-
-![overview](https://res.innc11.cn/pictures/version/QQ20200726152008.png)
-
-#### 预览2(官方样式的后台)
+#### 预览1
 
 ![overview2](https://res.innc11.cn/pictures/version/2020-07-26152730.png)
+
+#### 预览2
+
+![overview](https://res.innc11.cn/pictures/version/QQ20200726152008.png)
 
 ## 版本历史
 
