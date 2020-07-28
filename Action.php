@@ -4,7 +4,7 @@ if (!defined('__TYPECHO_ROOT_DIR__')) exit;
 
 class Version_Action extends Typecho_Widget implements Widget_Interface_Do
 {
-	public function __construct($request, $response, $params = null)
+    public function __construct($request, $response, $params = null)
     {
         parent::__construct($request, $response, $params);
 
@@ -16,7 +16,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
     }
 
     public function action()
-	{
+    {
 
     }
 
@@ -33,9 +33,9 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->response->setContentType('image/gif');
         echo base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAQUAP8ALAAAAAABAAEAAAICRAEAOw==');
     }
-	
-	public function revert()
-	{
+    
+    public function revert()
+    {
         $this->permissionCheck();
 
         $vid = $this->request->get('vid');
@@ -71,7 +71,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
     }
     
     public function delete()
-	{
+    {
         $this->permissionCheck();
 
         $vid = $this->request->get('vid');
@@ -90,7 +90,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
     }
     
     public function preview()
-	{
+    {
         $this->permissionCheck();
 
         $vid = $this->request->get('vid');
