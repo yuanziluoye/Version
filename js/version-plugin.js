@@ -49,6 +49,7 @@ function version_plugin_init()
             return
 
         var vid = $(this).attr('version-id')
+        var time = $(this).attr('time')
 
         $('.Version-view').removeClass('hidden')
         $('.Version-view-container-text').text('内容正在加载...')
@@ -65,6 +66,8 @@ function version_plugin_init()
                 data = data.replace(reg, "")
 
                 $('.Version-view-container-text').text(data)
+
+                $('.Version-view p label').html('历史版本预览('+time+')')
             },
             error: function(xhr, status, error) {
                 alert("内容加载失败")
