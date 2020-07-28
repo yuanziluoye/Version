@@ -17,8 +17,8 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		$result = self::install();
 
 		// 插入JS
-		Typecho_Plugin::factory('admin/write-post.php')->bottom = ['Version_Plugin', 'inject'];
-		Typecho_Plugin::factory('admin/write-page.php')->bottom = ['Version_Plugin', 'inject'];
+		Typecho_Plugin::factory('admin/write-post.php')->bottom = ['Version_Plugin', 'js'];
+		Typecho_Plugin::factory('admin/write-page.php')->bottom = ['Version_Plugin', 'js'];
 
 		// 监听事件
 		Typecho_Plugin::factory('Widget_Contents_Post_Edit')->finishPublish =  ['Version_Plugin', 'onPostPublish'];
@@ -54,7 +54,6 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		Helper::removeRoute("Version_Plugin_Delete");
 		Helper::removeRoute("Version_Plugin_Preview");
 		Helper::removeRoute("Version_Plugin_Comment");
-		
 	}
 
 	public static function render()
@@ -75,25 +74,37 @@ class Version_Plugin implements Typecho_Plugin_Interface
                 'no' => '不删除',
 			), 'no', '删除数据表:', '是否在禁用插件时，删除所有文章的修改记录？');
 			
+		$form->addInput($clean);
+		
+		$clean = new Typecho_Widget_Helper_Form_Element_Radio(
+            'noAutoSaveVersion', array(
+                'yes' => '不保留',
+                'no' => '保留',
+			), 'yes', '不保留自动保存的版本:', '是否在手动保存时(保存草稿、发布文章)，删除插件自动保存的版本？');
+			
         $form->addInput($clean);
 	}
 
-	public static function inject($pageOrPost)
+	public static function js($pageOrPost)
 	{
 		$options = Typecho_Widget::widget('Widget_Options');
 		echo '<script src="' . $options->pluginUrl . '/Version/js/overwrite.js"></script>' . PHP_EOL;
-		echo '<script src="' . $options->pluginUrl . '/Version/js/inject.js"></script>' . PHP_EOL;
-		echo '<link rel="stylesheet" href="' . $options->pluginUrl . '/Version/css/main.css"/>' . PHP_EOL;
+		echo '<script src="' . $options->pluginUrl . '/Version/js/version-plugin.js"></script>' . PHP_EOL;
+		echo '<link rel="stylesheet" href="' . $options->pluginUrl . '/Version/css/version-plugin.css"/>' . PHP_EOL;
 
 		$db = Typecho_Db::get();
 		$table = $db->getPrefix() . 'verion_plugin';
-		$rows = $db->fetchAll($db->select()->from($table)->where("cid = ? ", $page->cid)->order('time', Typecho_Db::SORT_DESC));
+		$rows = $db->fetchAll($db->select()->from($table)->where("cid = ? ", $pageOrPost->cid)->order('time', Typecho_Db::SORT_DESC));
 
 		ob_start();
-		include 'version-tab.php';
+		include 'vp-menu.php';
 		$content = ob_get_clean();
 
-		echo "<script>version_plugin_inj(`" . $content . "`, ".count($rows).")</script>" . PHP_EOL;
+		ob_start();
+		include 'vp-preview.php';
+		$content2 = ob_get_clean();
+
+		echo "<script>version_plugin_execute(`".$content."`, `".$content2."`, ".count($rows).");</script>". PHP_EOL;
 	}
 
 	public static function onPostDelete($postCid, $that)
@@ -131,10 +142,8 @@ class Version_Plugin implements Typecho_Plugin_Interface
 
 	public static function record($contents, $that)
 	{
-		// $type = $contents['type'];
-
 		$user = Typecho_Widget::widget('Widget_User');
-		$user->hasLogin();
+		$user->hasLogin(); // 调用一下hasLoging()可以让$user进行初始化
 
 		$db = Typecho_Db::get();
 		$table = $db->getPrefix() . 'verion_plugin';
@@ -145,14 +154,9 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		{
 			$row = $db->fetchRow($db->select()->from($table)->where("auto = 'auto' AND cid = ? ", $that->cid));
 
-			if(!empty($row))
+			// 如果没有之前保存过的自动保存版本，就新创建一个
+			if(empty($row))
 			{
-				$row['time'] = $time;
-				$row['modifierid'] = $uid;
-				$row['text'] = $contents['text'];
-	
-				$db->query($db->update($table)->rows($row)->where("vid = ? ", $row['vid']));
-			}else{
 				$row = [
 					"cid" => $that->cid,
 					'text' => $contents['text'],
@@ -162,6 +166,12 @@ class Version_Plugin implements Typecho_Plugin_Interface
 				];
 	
 				$db->query($db->insert($table)->rows($row));
+			}else{ // 有就直接覆盖
+				$row['time'] = $time;
+				$row['modifierid'] = $uid;
+				$row['text'] = $contents['text'];
+	
+				$db->query($db->update($table)->rows($row)->where("vid = ? ", $row['vid']));
 			}
 			
 		}else{
@@ -173,6 +183,7 @@ class Version_Plugin implements Typecho_Plugin_Interface
 			{
 				$raw['time'] = $time;
 				$raw['modifierid'] = $uid;
+
 				$db->query($db->update($table)->rows($raw)->where("vid = ? ", $raw['vid']));
 			}else{
 				$row = [
@@ -182,12 +193,17 @@ class Version_Plugin implements Typecho_Plugin_Interface
 					'time' => $time,
 					'modifierid' => $uid
 				];
+
 				$db->query($db->insert($table)->rows($row));
 			}
-			
-			// 删掉自动保存的内容
-			$db->query($db->delete($table)->where("auto = 'auto' AND cid = ? ", $that->cid));
-			
+
+			$config = Typecho_Widget::widget('Widget_Options')->plugin('Version');
+
+			if ($config->noAutoSaveVersion == 'yes')
+			{
+				// 删掉自动保存的内容
+				$db->query($db->delete($table)->where("auto = 'auto' AND cid = ? ", $that->cid));
+			}
 		}
 		
 	}
@@ -223,14 +239,12 @@ class Version_Plugin implements Typecho_Plugin_Interface
 		$prefix = $db->getPrefix();
 
 		try {
-
 			$script = self::getSQL($dbType);
 
 			foreach ($script as $statement)
 				$db->query($statement, Typecho_Db::WRITE);
 
 			return '插件启用成功';
-
 		} catch (Typecho_Db_Exception $e) {
 			$code = $e->getCode();
 			

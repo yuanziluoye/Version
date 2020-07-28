@@ -1,12 +1,12 @@
-// 覆盖掉原有的代码，只为控制自动保存机制，不得不说官方的代码一言难尽，
-// 简直毫无规范性可言，不得不写出这么长的代码覆盖掉原代码
-// 那么多代码都是被迫依赖的，核心目的只是控制自动保存时带个参数，让服务端那边能识别
-// 出来是自动保存的而不是手动保存的
+// 覆盖掉原有的代码，只为控制自动保存机制，不得不说官方js的代码一言难尽，
+// 不得不写出这么长的代码覆盖掉原代码
+// 那么多代码都是被迫依赖的，核心目的只是控制自动保存时带个参数，让服务端那边
+// 能识别出来是自动保存的而不是手动保存的
 function version_plugin_overwrite()
 {
 	// 控制选项和附件的切换(Copy自write-js.php)
-	// 官方没有封装成函数，无奈只好照着写了一遍
-	// 为的是将新添加的按钮也注册一下
+	// 官方没有封装成函数，无法直接调用执行
+	// 无奈只好照着写了一遍，为的是将新添加的"历史版本"按钮也注册到选项卡里
 	var fileUploadInit = false;
 	$('#edit-secondary .typecho-option-tabs li').unbind('click')
 	$('#edit-secondary .typecho-option-tabs li').click(function() {
@@ -25,7 +25,18 @@ function version_plugin_overwrite()
 		return false;
 	});
 
-	//////////////////////////////////////////
+
+	// 改动:
+	// 1. saveData()增加了一个参数t作为一个额外的GET请求被一起发送出去，用于标识是
+	//       自动保存的还是手动保存的
+	// 2. :input监听器可能是想监听所有可输入的元素，我增加了一个额外的排除规则防止
+	//       编辑历史版本的标签时被误以为改动了文章而发起一个不必要的保存请求
+	// 3. 在:input监听器中插入了changed = true;来使对第三方编辑器也生效(我用的EDITMD，其它暂未测试)
+	//
+	// 其它部分没有改动，都是按着write-js.php复制过来的，无奈官方代码卸载一个函数内没办法直
+	// 接操作只能将大部分代码再次重写一遍以解决变量依赖的问题
+
+	//// 重写原有代码 开始
 
 	var submitted = false
 	
@@ -38,8 +49,8 @@ function version_plugin_overwrite()
 	var draftId = draft.length > 0 ? draft.val() : 0
 	
 	var locked = false
-	var btnSave = $('#btn-save')//.removeAttr('name').removeAttr('value')
-	var btnSubmit = $('#btn-submit')//.removeAttr('name').removeAttr('value')
+	var btnSave = $('#btn-save')
+	var btnSubmit = $('#btn-submit')
 	var btnPreview = $('#btn-preview')
 	var doAction = $('input[name="do"]', form)
 	var changed = false
@@ -56,7 +67,8 @@ function version_plugin_overwrite()
 	$(':input', form).bind('input change', function (e) {
 		var tagName = $(this).prop('tagName');
 
-        if ((tagName.match(/(input|textarea)/i) && e.type == 'change') || $(this).hasClass('version-plugin-no-listening-input')) { // 过滤一些元素
+		if ((tagName.match(/(input|textarea)/i) && e.type == 'change') || 
+				$(this).hasClass('version-plugin-not-listen-input')) { // 修改历史版本上的标签不算编辑文章内容，所以return
 			return;
 		}
 
