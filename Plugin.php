@@ -1,11 +1,11 @@
 <?php
 /**
- * 对文章增加简单的修改记录功能(包括文章和独立页面)<br/>项目地址和帮助信息: <a href="https://github.com/innc11/Version">innc11/Version</a>
+ * 对文章增加简单的修改记录功能
  *
  * @package Version
  * @author innc11
  * @version 1.3
- * @link https://innc11.cn
+ * @link https://github.com/typecho-fans/plugins/tree/master/Version
  */
 
 if (!defined('__TYPECHO_ROOT_DIR__')) exit;
