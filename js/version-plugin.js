@@ -68,6 +68,9 @@ function version_plugin_init()
                 $('.Version-view-container-text').text(data)
 
                 $('.Version-view p label').html('历史版本预览('+time+')')
+
+                var Text = document.querySelector('.Version-view-container-text')
+                Text.scrollTop = Text.scrollHeight
             },
             error: function(xhr, status, error) {
                 alert("内容加载失败")
