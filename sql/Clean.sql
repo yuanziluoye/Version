@@ -1,1 +1,1 @@
-DROP TABLE  '%prefix%verion_plugin';
+DROP TABLE  `%prefix%verion_plugin`;
