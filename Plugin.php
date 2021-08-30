@@ -45,11 +45,11 @@ class Version_Plugin implements Typecho_Plugin_Interface
         {
             $db = Typecho_Db::get();
             $script = self::getSQL('Clean');
-            
+
             foreach ($script as $statement)
                 $db->query($statement, Typecho_Db::WRITE);
         }
-        
+
         Helper::removeRoute("Version_Plugin_Revert");
         Helper::removeRoute("Version_Plugin_Delete");
         Helper::removeRoute("Version_Plugin_Preview");
@@ -58,7 +58,7 @@ class Version_Plugin implements Typecho_Plugin_Interface
 
     public static function render()
     {
-        
+
     }
 
     public static function personalConfig(Typecho_Widget_Helper_Form $form)
@@ -70,18 +70,18 @@ class Version_Plugin implements Typecho_Plugin_Interface
     {
         $clean = new Typecho_Widget_Helper_Form_Element_Radio(
             'clean', array(
-                'yes' => '删除',
-                'no' => '不删除',
-            ), 'no', '删除数据表:', '是否在禁用插件时，删除所有文章的修改记录？');
-            
+            'yes' => '删除',
+            'no' => '不删除',
+        ), 'no', '删除数据表:', '是否在禁用插件时，删除所有文章的修改记录？');
+
         $form->addInput($clean);
-        
+
         $clean = new Typecho_Widget_Helper_Form_Element_Radio(
             'noAutoSaveVersion', array(
-                'yes' => '不保留',
-                'no' => '保留',
-            ), 'yes', '不保留自动保存的版本:', '是否在手动保存时(保存草稿、发布文章)，删除插件自动保存的版本？');
-            
+            'yes' => '不保留',
+            'no' => '保留',
+        ), 'yes', '不保留自动保存的版本:', '是否在手动保存时(保存草稿、发布文章)，删除插件自动保存的版本？');
+
         $form->addInput($clean);
     }
 
@@ -164,16 +164,16 @@ class Version_Plugin implements Typecho_Plugin_Interface
                     'time' => $time,
                     'modifierid' => $uid
                 ];
-    
+
                 $db->query($db->insert($table)->rows($row));
             }else{ // 有就直接覆盖
                 $row['time'] = $time;
                 $row['modifierid'] = $uid;
                 $row['text'] = $contents['text'];
-    
+
                 $db->query($db->update($table)->rows($row)->where("vid = ? ", $row['vid']));
             }
-            
+
         }else{
             //                                                               自动保存的内容不包括在内
             $raw = $db->fetchRow($db->select()->from($table)->where("cid = ? AND auto IS NULL", $that->cid)->order('time', Typecho_Db::SORT_DESC));
@@ -205,18 +205,18 @@ class Version_Plugin implements Typecho_Plugin_Interface
                 $db->query($db->delete($table)->where("auto = 'auto' AND cid = ? ", $that->cid));
             }
         }
-        
+
     }
 
     public static function getSQL($file)
     {
         $db = Typecho_Db::get();
-        $prefix = $db->getPrefix();
+        $dbConfig = $db->getConfig();
 
-        $config = Typecho_Widget::widget('Widget_Options');
-        $script = file_get_contents($config->pluginUrl . '/Version/sql/' . $file . '.sql');
-        $script = str_replace('%prefix%', $prefix, $script);
-        $script = str_replace('%charset%', 'utf8', $script);
+        $firstDb = $dbConfig[0];
+        $script = file_get_contents(__DIR__ . '/sql/' . $file . '.sql');
+        $script = str_replace('%prefix%', $db->getPrefix(), $script);
+        $script = str_replace('%charset%', $firstDb->charset, $script);
         $script = explode(';', $script);
 
         $statements = [];
@@ -235,8 +235,8 @@ class Version_Plugin implements Typecho_Plugin_Interface
     public static function install()
     {
         $db = Typecho_Db::get();
-        $dbType = array_pop(explode('_', $db->getAdapterName()));
-        $prefix = $db->getPrefix();
+        $adapter = explode('_', $db->getAdapterName());
+        $dbType = array_pop($adapter);
 
         try {
             $script = self::getSQL($dbType);
@@ -247,8 +247,8 @@ class Version_Plugin implements Typecho_Plugin_Interface
             return '插件启用成功';
         } catch (Typecho_Db_Exception $e) {
             $code = $e->getCode();
-            
-            if(($dbType == 'Mysql' && $code == 1050) || ($dbType == 'SQLite' && ($code =='HY000' || $code == 1)))
+
+            if(($dbType == 'Mysql' && $code == '42S01') || ($dbType == 'SQLite' && ($code =='HY000' || $code == 1)))
             {
                 try {
                     $script = self::getSQL("Check");
@@ -269,5 +269,5 @@ class Version_Plugin implements Typecho_Plugin_Interface
 
     }
 
-    
+
 }
