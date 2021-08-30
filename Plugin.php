@@ -33,6 +33,7 @@ class Version_Plugin implements Typecho_Plugin_Interface
         Helper::addRoute("Version_Plugin_Delete",  "/version-plugin/delete",  "Version_Action", 'delete');
         Helper::addRoute("Version_Plugin_Preview", "/version-plugin/preview", "Version_Action", 'preview');
         Helper::addRoute("Version_Plugin_Comment", "/version-plugin/comment", "Version_Action", 'comment');
+        Helper::addRoute("Version_Plugin_Compare", "/version-plugin/compare", "Version_Action", 'compare');
 
         return $result;
     }
@@ -90,11 +91,24 @@ class Version_Plugin implements Typecho_Plugin_Interface
         $options = Typecho_Widget::widget('Widget_Options');
         echo '<script src="' . $options->pluginUrl . '/Version/js/overwrite.js"></script>' . PHP_EOL;
         echo '<script src="' . $options->pluginUrl . '/Version/js/version-plugin.js"></script>' . PHP_EOL;
+        echo '<script src="' . $options->pluginUrl . '/Version/js/diff.min.js"></script>' . PHP_EOL;
+        echo '<script src="' . $options->pluginUrl . '/Version/js/nouislider.min.js"></script>' . PHP_EOL;
         echo '<link rel="stylesheet" href="' . $options->pluginUrl . '/Version/css/version-plugin.css"/>' . PHP_EOL;
+        echo '<link rel="stylesheet" href="' . $options->pluginUrl . '/Version/css/nouislider.min.css"/>' . PHP_EOL;
 
         $db = Typecho_Db::get();
         $table = $db->getPrefix() . 'verion_plugin';
         $rows = $db->fetchAll($db->select()->from($table)->where("cid = ? ", $pageOrPost->cid)->order('time', Typecho_Db::SORT_DESC));
+
+        $rowsCopy = $rows;
+        $rowsCount = count($rowsCopy);
+        $firstRow = array_pop($rowsCopy);
+        if ($rowsCount > 1) {
+            $rowsReverse = array_reverse($rowsCopy);
+            $lastRow = array_pop($rowsReverse);
+        } else {
+            $lastRow = $firstRow;
+        }
 
         ob_start();
         include 'vp-menu.php';
@@ -104,7 +118,23 @@ class Version_Plugin implements Typecho_Plugin_Interface
         include 'vp-preview.php';
         $content2 = ob_get_clean();
 
-        echo "<script>version_plugin_execute(`".$content."`, `".$content2."`, ".count($rows).");</script>". PHP_EOL;
+        $vids = [];
+        foreach ($rows as $row) {
+            $vids[$row['vid']] = [
+                'vid' => $row['vid'],
+                'time' => date('y-m-d H:i', $row['time'])
+            ];
+        }
+        $vidStr = json_encode($vids);
+        $globalVars = <<<EOT
+<script>
+    var firstVid = {$firstRow['vid']};
+    var lastVid = {$lastRow['vid']};
+    var vids = {$vidStr};
+</script>
+EOT;
+
+        echo "{$globalVars}<script>version_plugin_execute(`".$content."`, `".$content2."`, ".count($rows).");</script>". PHP_EOL;
     }
 
     public static function onPostDelete($postCid, $that)

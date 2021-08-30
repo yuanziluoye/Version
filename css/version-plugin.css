@@ -34,8 +34,6 @@
 }
 
 .Version-view-container-text {
-    display: block;
-    height: 100%;
     outline: none;
     border: none;
     scroll-behavior: smooth;
@@ -51,4 +49,15 @@
 
 .Version-row-label input {
     color: inherit !important;
+}
+
+.version-range-slider-wrapper {
+    margin-top: 50px;
+    height: 60px;
+}
+
+.version-diff {
+    padding: 7px;
+    color: #000;
+    background: #fff;
 }

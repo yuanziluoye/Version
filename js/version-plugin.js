@@ -65,7 +65,8 @@ function version_plugin_init()
                 var reg = new RegExp("^<!\-\-markdown\-\->", "g")
                 data = data.replace(reg, "")
 
-                $('.Version-view-container-text').text(data)
+                $('.version-diff').addClass('hidden');
+                $('.Version-view-container-text').removeClass('hidden').text(data)
 
                 $('.Version-view p label').html('历史版本预览('+time+')')
 
@@ -124,6 +125,92 @@ function version_plugin_init()
 
 }
 
+/**
+ * 历史版本 range slider
+ */
+function versionRangeSlider() {
+    var stepsSlider = $('.js-version-range-slider').get(0);
+    if (!stepsSlider) {
+        return;
+    }
+
+    noUiSlider.create(stepsSlider, {
+        start: [window.firstVid, window.lastVid],
+        connect: true,
+        range: {
+            min: 1,
+            max: Object.values(window.vids).length
+        },
+        step: 1,
+        margin: 1,
+        behaviour: 'tap-drag',
+        tooltips: true,
+        pips: {
+            mode: 'steps',
+            density: -1
+        },
+        format: {
+            from: function (value) {
+                return parseInt(value);
+            },
+            to: function (value) {
+                return parseInt(value);
+            }
+        }
+    });
+
+    var tooltips = stepsSlider.noUiSlider.getTooltips();
+    stepsSlider.noUiSlider.on('update', function (values, handle, unencoded, tap, positions) {
+        var vids = window.vids;
+        var vidArr = Object.values(window.vids);
+        var item = vidArr[values[handle] - 1];
+        tooltips[handle].innerHTML = vids[item.vid].time;
+
+        var compare = '';
+        for (var i = 0; i < values.length; ++i) {
+            var oneVid = vidArr[values[i] - 1];
+            compare += i !== values.length - 1 ? oneVid.vid + ',' : oneVid.vid;
+        }
+
+        $.ajax({
+            url: location.origin + "/version-plugin/compare",
+            data: {vids: compare},
+            cache: false,
+            type: 'GET',
+            success: function (res) {
+                if (typeof res.code === 'undefined') {
+                    alert('加载版本对比数据失败');
+                    return;
+                }
+
+                var reg = new RegExp("^<!\-\-markdown\-\->", "g");
+                var data = res.data;
+                var one, other;
+                one = data[0].text.replace(reg, "");
+                other = data[1].text.replace(reg, "");
+
+                var color = '', span = null;
+                var diff = Diff.diffChars(one, other),
+                div = document.createElement('div');
+                diff.forEach(function (part) {
+                    part.value = part.value.replace(/(?:\r\n|\r|\n)/g, '<br>');
+                    color = part.added ? 'blue' :
+                        part.removed ? 'red' : '';
+                    span = document.createElement('span');
+                    span.style.color = color;
+                    span.innerHTML = part.value;
+                    div.appendChild(span);
+                });
+
+                $('.Version-view-container-text').addClass('hidden');
+                $('.version-diff').removeClass('hidden').html(div.innerHTML);
+            },
+            error: function (xhr, status, error) {
+                alert('加载版本对比数据失败');
+            }
+        });
+    });
+}
 
 function version_plugin_execute(content, content2, vers)
 {
@@ -138,7 +225,7 @@ function version_plugin_execute(content, content2, vers)
             seul.find('li').eq(1).removeClass("w-50")
             seul.find('li').eq(0).addClass("w-30")
             seul.find('li').eq(1).addClass("w-30")
-            
+
             seul.append('<li class="w-40"><a href="#tab-verions" id="tab-verions-btn">历史版本'+(vers>0?("("+vers+")"):"")+'</a></li>')
 
             // 重写自动保存的部分
@@ -166,6 +253,7 @@ function version_plugin_execute(content, content2, vers)
 
             // 监听事件
             version_plugin_init()
+            versionRangeSlider()
         }, 200)
     })
 }

@@ -23,7 +23,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
     public function permissionCheck()
     {
         $user = Typecho_Widget::widget('Widget_User');
-        
+
         if(!$user->pass('editor', true))
             throw new Typecho_Widget_Exception(_t('没有编辑权限'), 403);
     }
@@ -33,7 +33,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         $this->response->setContentType('image/gif');
         echo base64_decode('R0lGODlhAQABAIAAAAAAAP///yH5BAQUAP8ALAAAAAABAAEAAAICRAEAOw==');
     }
-    
+
     public function revert()
     {
         $this->permissionCheck();
@@ -42,7 +42,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
 
         if(!isset($vid))
             throw new Typecho_Widget_Exception(_t('参数不正确'), 404);
-        
+
         $vid = intval($vid);
 
         $db = Typecho_Db::get();
@@ -54,7 +54,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         // 找出文章和文章的草稿
         $raw = $db->fetchRow($db->select()->from('table.contents')->where("cid = ? ", $cid));
         $raw2 = $db->fetchRow($db->select()->from('table.contents')->where("parent = ? AND (type = 'post' OR type = 'post_draft' OR type = 'page' OR type = 'page_draft')", $cid));
-        
+
         if(!empty($row))
         {
             $raw['text'] = $row['text'];
@@ -66,10 +66,10 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
         }else{
             throw new Typecho_Widget_Exception(_t('数据为空'), 404);
         }
-        
+
         // $this->respond();
     }
-    
+
     public function delete()
     {
         $this->permissionCheck();
@@ -78,17 +78,17 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
 
         if(!isset($vid))
             throw new Typecho_Widget_Exception(_t('参数不正确'), 404);
-        
+
         $vid = intval($vid);
 
         $db = Typecho_Db::get();
         $table = $db->getPrefix() . 'verion_plugin';
 
         $db->query($db->delete($table)->where('vid = ? ', $vid));
-        
+
         // $this->respond();
     }
-    
+
     public function preview()
     {
         $this->permissionCheck();
@@ -97,15 +97,50 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
 
         if(!isset($vid))
             throw new Typecho_Widget_Exception(_t('参数不正确'), 404);
-        
+
         $vid = intval($vid);
 
         $db = Typecho_Db::get();
         $table = $db->getPrefix() . 'verion_plugin';
         $row = $db->fetchRow($db->select()->from($table)->where('vid = ? ', $vid));
-        
+
         $this->response->setContentType('text/plain');
         echo $row['text'];
+    }
+
+    /**
+     * 返回两个版本的内容
+     * @throws Typecho_Db_Exception
+     * @throws Typecho_Widget_Exception
+     */
+    public function compare()
+    {
+        $this->permissionCheck();
+
+        $versions = $this->request->get('vids');
+        if (!isset($versions)) {
+            throw new Typecho_Widget_Exception(_t('版本不能为空'), 404);
+        }
+
+        $versionArr = explode(',', $versions);
+        $versionArr = array_filter($versionArr);
+
+        if (count($versionArr) !== 2) {
+            throw new Typecho_Widget_Exception(_t('版本号数量必须为2'), 404);
+        }
+
+        $db = Typecho_Db::get();
+        $table = $db->getPrefix() . 'verion_plugin';
+
+        $data = [];
+        foreach ($versionArr as $vid) {
+            $row = $db->fetchRow($db->select()->from($table)->where('vid = ? ', $vid));
+            $data[] = [
+                'text' => $row['text'],
+            ];
+        }
+
+        $this->response->throwJson(['code' => 200, 'message' => '', 'data' => $data]);
     }
 
     public function comment()
@@ -117,7 +152,7 @@ class Version_Action extends Typecho_Widget implements Widget_Interface_Do
 
         if(!isset($vid))
             throw new Typecho_Widget_Exception(_t('参数不正确'), 404);
-        
+
         $vid = intval($vid);
 
         $db = Typecho_Db::get();
