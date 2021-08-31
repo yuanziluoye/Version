@@ -126,11 +126,18 @@ class Version_Plugin implements Typecho_Plugin_Interface
             ];
         }
         $vidStr = json_encode($vids);
+
+        $options = Typecho_Widget::widget('Widget_Options');
+        $rootUrl = $options->rootUrl;
+        $baseUrl = str_replace(Typecho_Request::getUrlPrefix(), '', $rootUrl);
+        $baseUrl = rtrim($baseUrl, '/');
+
         $globalVars = <<<EOT
 <script>
     var firstVid = {$firstRow['vid']};
     var lastVid = {$lastRow['vid']};
     var vids = {$vidStr};
+    var baseUrl = '{$baseUrl}';
 </script>
 EOT;
 
