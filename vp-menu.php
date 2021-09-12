@@ -44,7 +44,7 @@
                         version-id="<?php _e($row['vid']); ?>"
                         modifier="<?php _e($_user['screenName']); ?>"
                         time="<?php _e($_time); ?>"
-                        is-auto="<?php _e($row['auto']); ?>"
+                        is-auto="<?php _e((string)$row['auto']); ?>"
                     >
                         <td>
                             <div class="Version-row-time <?php _e($hightlight) ?>" <?php $auto&&false?_e('style="display: inline-block"'):'' ?> >
@@ -59,7 +59,7 @@
                         </td>
                         <td>
                             <div class="Version-row-label <?php _e($hightlight) ?>">
-                                <?php $_content = !$auto?$row['comment']:'自动保存版本'; ?>
+                                <?php $_content = !$auto ? (string)$row['comment'] : '自动保存版本'; ?>
                                 <?php if(!$auto || true): ?>
                                     <input type="text" <?php if($auto) _e('disabled'); ?> autocomplete="off" rows="1" class="w-100 mono Version-not-listen-input" last="<?php _e($_content); ?>" value="<?php _e($_content); ?>"></input>
                                 <?php endif; ?>

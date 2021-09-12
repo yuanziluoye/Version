@@ -129,15 +129,13 @@ class Version_Plugin implements Typecho_Plugin_Interface
 
         $options = Typecho_Widget::widget('Widget_Options');
         $rootUrl = $options->rootUrl;
-        $baseUrl = str_replace(Typecho_Request::getUrlPrefix(), '', $rootUrl);
-        $baseUrl = rtrim($baseUrl, '/');
 
         $globalVars = <<<EOT
 <script>
     var firstVid = {$firstRow['vid']};
     var lastVid = {$lastRow['vid']};
     var vids = {$vidStr};
-    var baseUrl = '{$baseUrl}';
+    var baseUrl = '{$rootUrl}';
 </script>
 EOT;
 
@@ -248,12 +246,20 @@ EOT;
     public static function getSQL($file)
     {
         $db = Typecho_Db::get();
-        $dbConfig = $db->getConfig();
 
-        $firstDb = $dbConfig[0];
+        if (class_exists('\Typecho\Db') && defined('Typecho\Db::READ')) { // v1.2.0-beta.1 起
+            $dbConfig = $db->getConfig(\Typecho\Db::READ);
+            $firstDb = $dbConfig->toArray();
+            $charset = $firstDb['charset'];
+        } else { // v1.1-17.10.30-release
+            $dbConfig = $db->getConfig();
+            $firstDb = $dbConfig[0];
+            $charset = $firstDb->charset;
+        }
+
         $script = file_get_contents(__DIR__ . '/sql/' . $file . '.sql');
         $script = str_replace('%prefix%', $db->getPrefix(), $script);
-        $script = str_replace('%charset%', $firstDb->charset, $script);
+        $script = str_replace('%charset%', $charset, $script);
         $script = explode(';', $script);
 
         $statements = [];

@@ -8,7 +8,7 @@ function version_plugin_init()
 
         if(confirm(message)) {
             $.ajax({
-                url: location.origin + window.baseUrl + "/version-plugin/revert",
+                url: window.baseUrl + "/version-plugin/revert",
                 data: {vid: vid},
                 cache: false,
                 type: 'GET',
@@ -30,7 +30,7 @@ function version_plugin_init()
 
         if(confirm(message)) {
             $.ajax({
-                url: location.origin + window.baseUrl + "/version-plugin/delete",
+                url: window.baseUrl + "/version-plugin/delete",
                 data: {vid: vid},
                 cache: false,
                 type: 'GET',
@@ -56,7 +56,7 @@ function version_plugin_init()
         $('.Version-view-actionbar').attr('version-id', vid)
 
         $.ajax({
-            url: location.origin + window.baseUrl + "/version-plugin/preview",
+            url: window.baseUrl + "/version-plugin/preview",
             data: {vid: vid},
             cache: false,
             type: 'GET',
@@ -92,7 +92,7 @@ function version_plugin_init()
             _this.val('正在设置标签..')
 
             $.ajax({
-                url: location.origin + window.baseUrl + "/version-plugin/comment",
+                url: window.baseUrl + "/version-plugin/comment",
                 data: {vid: vid, comment: label},
                 cache: false,
                 type: 'GET',
@@ -173,7 +173,7 @@ function versionRangeSlider() {
         }
 
         $.ajax({
-            url: location.origin + window.baseUrl + "/version-plugin/compare",
+            url: window.baseUrl + "/version-plugin/compare",
             data: {vids: compare},
             cache: false,
             type: 'GET',
