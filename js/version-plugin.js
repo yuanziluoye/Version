@@ -134,6 +134,10 @@ function versionRangeSlider() {
         return;
     }
 
+    if (window.firstVid === 0 || window.lastVid === 0) {
+        return;
+    }
+
     noUiSlider.create(stepsSlider, {
         start: [window.firstVid, window.lastVid],
         connect: true,

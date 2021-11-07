@@ -102,13 +102,15 @@ class Version_Plugin implements Typecho_Plugin_Interface
 
         $rowsCopy = $rows;
         $rowsCount = count($rowsCopy);
-        $firstRow = array_pop($rowsCopy);
-        if ($rowsCount > 1) {
+        $firstRow = $lastRow = null;
+        if ($rowsCount > 0) {
+            $firstRow = array_pop($rowsCopy);
             $rowsReverse = array_reverse($rowsCopy);
             $lastRow = array_pop($rowsReverse);
-        } else {
-            $lastRow = $firstRow;
         }
+
+        $firstVid = $firstRow ? $firstRow['vid'] : 0;
+        $lastVid = $lastRow ? $lastRow['vid'] : 0;
 
         ob_start();
         include 'vp-menu.php';
@@ -132,8 +134,8 @@ class Version_Plugin implements Typecho_Plugin_Interface
 
         $globalVars = <<<EOT
 <script>
-    var firstVid = {$firstRow['vid']};
-    var lastVid = {$lastRow['vid']};
+    var firstVid = {$firstVid};
+    var lastVid = {$lastVid};
     var vids = {$vidStr};
     var baseUrl = '{$rootUrl}';
 </script>
